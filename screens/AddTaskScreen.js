@@ -4,12 +4,11 @@ import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-nativ
 import TaskCard from '../components/TaskCard';
 
 export default function AddTaskScreen() {
-
   const [taskText, setTaskText] = useState('');
   const [tasks, setTasks] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [quote, setQuote] = useState("Loading today's motivation...");
 
- 
   useEffect(() => {
     AsyncStorage.getItem('tasks').then((savedData) => {
       if (savedData !== null) {
@@ -18,10 +17,16 @@ export default function AddTaskScreen() {
     });
   }, []);
 
-
   useEffect(() => {
     AsyncStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
+
+  useEffect(() => {
+    fetch('https://dummyjson.com/quotes/random')
+      .then((response) => response.json())
+      .then((data) => setQuote(data.quote))
+      .catch(() => setQuote('Believe in yourself and get it done!'));
+  }, []);
 
   function handleAddTask() {
     if (taskText.trim() === '') {
@@ -45,6 +50,18 @@ export default function AddTaskScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Add a Task</Text>
+
+      <Text style={styles.quote}>💬 {quote}</Text>
+
+      <Button
+        title="New Quote"
+        onPress={() => {
+          fetch('https://dummyjson.com/quotes/random')
+            .then((response) => response.json())
+            .then((data) => setQuote(data.quote))
+            .catch(() => setQuote('Believe in yourself and get it done!'));
+        }}
+      />
 
       <TextInput
         style={styles.input}
@@ -85,8 +102,9 @@ export default function AddTaskScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 60, paddingHorizontal: 16, backgroundColor: '#FFFFFF' },
-  heading: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#D8DEE9', borderRadius: 8, padding: 10, marginBottom: 10 },
+  heading: { fontSize: 24, fontWeight: 'bold', marginBottom: 12 },
+  quote: { fontStyle: 'italic', color: '#6B7280', marginBottom: 12, textAlign: 'center' },
+  input: { borderWidth: 1, borderColor: '#D8DEE9', borderRadius: 8, padding: 10, marginTop: 16, marginBottom: 10 },
   list: { marginTop: 16 },
   empty: { textAlign: 'center', color: '#6B7280', marginTop: 24 },
   separator: { height: 8 },
